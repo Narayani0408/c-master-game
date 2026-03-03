@@ -1,79 +1,43 @@
 import React, { useState, useEffect } from "react";
+import useSound from "use-sound";
+
+const clickSoundUrl =
+  "https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3";
+const correctSoundUrl =
+  "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3";
+const wrongSoundUrl =
+  "https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3";
 
 const questions = [
   {
-    question: `What is the output?
-console.log(typeof NaN);`,
+    question: `console.log(typeof NaN);`,
     options: ["number", "NaN", "undefined", "object"],
     answer: "number",
-    hint: "NaN stands for Not a Number but JS is tricky 😏"
+    hint: "JS trick 😏"
   },
   {
-    question: `What is the output?
-console.log(0.1 + 0.2 === 0.3);`,
+    question: `console.log(0.1 + 0.2 === 0.3);`,
     options: ["true", "false", "undefined", "error"],
     answer: "false",
-    hint: "Floating point precision problem"
+    hint: "Floating precision"
   },
   {
-    question: `What is the output?
-let x = [1,2,3];
-console.log(x + 1);`,
-    options: ["1,2,31", "Error", "NaN", "[1,2,3,1]"],
-    answer: "1,2,31",
-    hint: "Array converts to string first"
+    question: `console.log([] == false);`,
+    options: ["true", "false", "error", "undefined"],
+    answer: "true",
+    hint: "Type coercion"
   },
   {
-    question: `In C, what is output?
-int a = 5;
-printf("%d %d", a++, ++a);`,
-    options: ["5 6", "6 7", "5 7", "Undefined Behavior"],
-    answer: "Undefined Behavior",
-    hint: "Sequence point issue ⚠"
+    question: `"5" - 2 = ?`,
+    options: ["3", "52", "NaN", "Error"],
+    answer: "3",
+    hint: "JS converts string"
   },
   {
-    question: `Nested loop time complexity?
-for(i=0;i<n;i++)
-  for(j=0;j<n;j++)`,
+    question: "Time complexity of nested loops?",
     options: ["O(n)", "O(n log n)", "O(n²)", "O(log n)"],
     answer: "O(n²)",
     hint: "n × n"
-  },
-  {
-    question: `What is the output?
-console.log([] == false);`,
-    options: ["true", "false", "error", "undefined"],
-    answer: "true",
-    hint: "Type coercion madness"
-  },
-  {
-    question: "Which is NOT a stable sorting algorithm?",
-    options: ["Merge Sort", "Bubble Sort", "Quick Sort", "Insertion Sort"],
-    answer: "Quick Sort",
-    hint: "Pivot based ⚡"
-  },
-  {
-    question: `What is the output?
-console.log("5" - 2);`,
-    options: ["3", "52", "NaN", "Error"],
-    answer: "3",
-    hint: "JS converts string to number here"
-  },
-  {
-    question: `What is the output?
-let a = {};
-let b = a;
-b.x = 10;
-console.log(a.x);`,
-    options: ["undefined", "10", "error", "null"],
-    answer: "10",
-    hint: "Objects are reference type"
-  },
-  {
-    question: "Which traversal gives sorted output in BST?",
-    options: ["Preorder", "Postorder", "Inorder", "Level Order"],
-    answer: "Inorder",
-    hint: "Left → Root → Right"
   }
 ];
 
@@ -85,6 +49,10 @@ function Level1() {
   const [showHint, setShowHint] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
+  const [playClick] = useSound(clickSoundUrl);
+  const [playCorrect] = useSound(correctSoundUrl);
+  const [playWrong] = useSound(wrongSoundUrl);
+
   useEffect(() => {
     if (time > 0 && !gameOver) {
       const timer = setTimeout(() => setTime(time - 1), 1000);
@@ -95,9 +63,13 @@ function Level1() {
   }, [time, gameOver]);
 
   const handleAnswer = (option) => {
+    playClick();
+
     if (option === questions[currentQ].answer) {
+      playCorrect();
       setScore((prev) => prev + 2);
     } else {
+      playWrong();
       setScore((prev) => prev - 1);
     }
 
@@ -113,6 +85,7 @@ function Level1() {
     if (hintsLeft > 0) {
       setHintsLeft((prev) => prev - 1);
       setShowHint(true);
+      playClick();
     }
   };
 
@@ -125,50 +98,115 @@ function Level1() {
     setGameOver(false);
   };
 
-  if (gameOver) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <h1>🎮 Level 1 Complete</h1>
-        <h2>Final Score: {score}</h2>
-        <button onClick={restartGame}>Restart</button>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ textAlign: "center", marginTop: "50px", padding: "20px" }}>
-      <h1>🔥 Level 1 - Hardcore Mode</h1>
-      <h3>⏳ Time Left: {time}s</h3>
-      <h3>💡 Hints Left: {hintsLeft}</h3>
-      <h3>📊 Score: {score}</h3>
-      <hr />
+    <div style={styles.wrapper}>
+      <div style={styles.backgroundAnimation}></div>
 
-      <h2>Question {currentQ + 1} / 10</h2>
-      <pre style={{ whiteSpace: "pre-wrap" }}>
-        {questions[currentQ].question}
-      </pre>
+      <div style={styles.card}>
+        {gameOver ? (
+          <>
+            <h1>🎮 Level Complete</h1>
+            <h2>Final Score: {score}</h2>
+            <button style={styles.button} onClick={restartGame}>
+              Restart
+            </button>
+          </>
+        ) : (
+          <>
+            <h1>🔥 Level 1 - Hardcore</h1>
+            <div style={styles.info}>
+              <span>⏳ {time}s</span>
+              <span>💡 {hintsLeft}</span>
+              <span>🏆 {score}</span>
+            </div>
 
-      {questions[currentQ].options.map((option, index) => (
-        <div key={index} style={{ margin: "10px" }}>
-          <button onClick={() => handleAnswer(option)}>
-            {option}
-          </button>
-        </div>
-      ))}
+            <h2>{questions[currentQ].question}</h2>
 
-      <br />
+            {questions[currentQ].options.map((option, index) => (
+              <button
+                key={index}
+                style={styles.button}
+                onClick={() => handleAnswer(option)}
+              >
+                {option}
+              </button>
+            ))}
 
-      {hintsLeft > 0 && (
-        <button onClick={useHint}>Use Hint</button>
-      )}
+            {hintsLeft > 0 && (
+              <button style={styles.hintButton} onClick={useHint}>
+                Use Hint
+              </button>
+            )}
 
-      {showHint && (
-        <p style={{ marginTop: "10px" }}>
-          💡 Hint: {questions[currentQ].hint}
-        </p>
-      )}
+            {showHint && (
+              <p style={styles.hintText}>
+                💡 {questions[currentQ].hint}
+              </p>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
+
+const styles = {
+  wrapper: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "black",
+    position: "relative",
+    overflow: "hidden"
+  },
+  backgroundAnimation: {
+    position: "absolute",
+    width: "200%",
+    height: "200%",
+    background:
+      "radial-gradient(circle, rgba(0,255,255,0.2) 10%, transparent 10%)",
+    backgroundSize: "50px 50px",
+    animation: "move 20s linear infinite"
+  },
+  card: {
+    position: "relative",
+    background: "rgba(0,0,0,0.8)",
+    padding: "40px",
+    borderRadius: "20px",
+    textAlign: "center",
+    color: "white",
+    width: "90%",
+    maxWidth: "600px",
+    boxShadow: "0 0 30px cyan",
+    backdropFilter: "blur(10px)"
+  },
+  button: {
+    margin: "10px",
+    padding: "10px 20px",
+    background: "cyan",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "bold"
+  },
+  hintButton: {
+    marginTop: "10px",
+    padding: "8px 15px",
+    background: "orange",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer"
+  },
+  hintText: {
+    marginTop: "10px",
+    color: "yellow"
+  },
+  info: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "20px"
+  }
+};
 
 export default Level1;
