@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import useSound from "use-sound";
 
-const clickSoundUrl =
+const clickSound =
   "https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3";
-const correctSoundUrl =
+const correctSound =
   "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3";
-const wrongSoundUrl =
+const wrongSound =
   "https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3";
 
 const questions = [
@@ -13,45 +13,81 @@ const questions = [
     question: `console.log(typeof NaN);`,
     options: ["number", "NaN", "undefined", "object"],
     answer: "number",
-    hint: "JS trick 😏"
+    hint: "JS weirdness"
   },
   {
     question: `console.log(0.1 + 0.2 === 0.3);`,
-    options: ["true", "false", "undefined", "error"],
+    options: ["true", "false", "error", "undefined"],
     answer: "false",
-    hint: "Floating precision"
+    hint: "Floating precision issue"
+  },
+  {
+    question: `let x = [1,2,3];
+console.log(x + 1);`,
+    options: ["1,2,31", "Error", "NaN", "[1,2,3,1]"],
+    answer: "1,2,31",
+    hint: "Array becomes string"
   },
   {
     question: `console.log([] == false);`,
-    options: ["true", "false", "error", "undefined"],
+    options: ["true", "false", "undefined", "error"],
     answer: "true",
     hint: "Type coercion"
   },
   {
-    question: `"5" - 2 = ?`,
+    question: `console.log("5" - 2);`,
     options: ["3", "52", "NaN", "Error"],
     answer: "3",
-    hint: "JS converts string"
+    hint: "Implicit conversion"
   },
   {
-    question: "Time complexity of nested loops?",
+    question: `console.log(null == undefined);`,
+    options: ["true", "false", "error", "undefined"],
+    answer: "true",
+    hint: "Loose equality"
+  },
+  {
+    question: `let a = {};
+let b = a;
+b.x = 10;
+console.log(a.x);`,
+    options: ["undefined", "10", "error", "null"],
+    answer: "10",
+    hint: "Objects are reference type"
+  },
+  {
+    question: `C Output:
+int a = 10;
+printf("%d", a++ + ++a);`,
+    options: ["21", "22", "Undefined Behavior", "20"],
+    answer: "Undefined Behavior",
+    hint: "Sequence points ⚠"
+  },
+  {
+    question: `Time complexity of merge sort?`,
     options: ["O(n)", "O(n log n)", "O(n²)", "O(log n)"],
-    answer: "O(n²)",
-    hint: "n × n"
+    answer: "O(n log n)",
+    hint: "Divide & conquer"
+  },
+  {
+    question: `BST traversal giving sorted output?`,
+    options: ["Preorder", "Postorder", "Inorder", "Level Order"],
+    answer: "Inorder",
+    hint: "Left Root Right"
   }
 ];
 
 function Level1() {
   const [currentQ, setCurrentQ] = useState(0);
   const [score, setScore] = useState(0);
-  const [time, setTime] = useState(60);
+  const [time, setTime] = useState(120);
   const [hintsLeft, setHintsLeft] = useState(3);
   const [showHint, setShowHint] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
-  const [playClick] = useSound(clickSoundUrl);
-  const [playCorrect] = useSound(correctSoundUrl);
-  const [playWrong] = useSound(wrongSoundUrl);
+  const [playClick] = useSound(clickSound);
+  const [playCorrect] = useSound(correctSound);
+  const [playWrong] = useSound(wrongSound);
 
   useEffect(() => {
     if (time > 0 && !gameOver) {
@@ -81,6 +117,15 @@ function Level1() {
     }
   };
 
+  const restartGame = () => {
+    setCurrentQ(0);
+    setScore(0);
+    setTime(120);
+    setHintsLeft(3);
+    setShowHint(false);
+    setGameOver(false);
+  };
+
   const useHint = () => {
     if (hintsLeft > 0) {
       setHintsLeft((prev) => prev - 1);
@@ -89,124 +134,54 @@ function Level1() {
     }
   };
 
-  const restartGame = () => {
-    setCurrentQ(0);
-    setScore(0);
-    setTime(60);
-    setHintsLeft(3);
-    setShowHint(false);
-    setGameOver(false);
-  };
-
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.backgroundAnimation}></div>
+    <div className="game-container">
+      {gameOver ? (
+        <div className="game-card">
+          <h1>🎮 Level Complete</h1>
+          <h2>Final Score: {score}</h2>
+          <button onClick={restartGame}>Restart</button>
+        </div>
+      ) : (
+        <div className="game-card">
+          <div className="top-bar">
+            <span>⏳ {time}s</span>
+            <span>💡 {hintsLeft}</span>
+            <span>🏆 {score}</span>
+          </div>
 
-      <div style={styles.card}>
-        {gameOver ? (
-          <>
-            <h1>🎮 Level Complete</h1>
-            <h2>Final Score: {score}</h2>
-            <button style={styles.button} onClick={restartGame}>
-              Restart
-            </button>
-          </>
-        ) : (
-          <>
-            <h1>🔥 Level 1 - Hardcore</h1>
-            <div style={styles.info}>
-              <span>⏳ {time}s</span>
-              <span>💡 {hintsLeft}</span>
-              <span>🏆 {score}</span>
-            </div>
+          <h2>Question {currentQ + 1}/10</h2>
 
-            <h2>{questions[currentQ].question}</h2>
+          <pre className="question">
+            {questions[currentQ].question}
+          </pre>
 
+          <div className="options">
             {questions[currentQ].options.map((option, index) => (
               <button
                 key={index}
-                style={styles.button}
                 onClick={() => handleAnswer(option)}
               >
                 {option}
               </button>
             ))}
+          </div>
 
-            {hintsLeft > 0 && (
-              <button style={styles.hintButton} onClick={useHint}>
-                Use Hint
-              </button>
-            )}
+          {hintsLeft > 0 && (
+            <button className="hint-btn" onClick={useHint}>
+              Use Hint
+            </button>
+          )}
 
-            {showHint && (
-              <p style={styles.hintText}>
-                💡 {questions[currentQ].hint}
-              </p>
-            )}
-          </>
-        )}
-      </div>
+          {showHint && (
+            <p className="hint-text">
+              💡 {questions[currentQ].hint}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
-
-const styles = {
-  wrapper: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "black",
-    position: "relative",
-    overflow: "hidden"
-  },
-  backgroundAnimation: {
-    position: "absolute",
-    width: "200%",
-    height: "200%",
-    background:
-      "radial-gradient(circle, rgba(0,255,255,0.2) 10%, transparent 10%)",
-    backgroundSize: "50px 50px",
-    animation: "move 20s linear infinite"
-  },
-  card: {
-    position: "relative",
-    background: "rgba(0,0,0,0.8)",
-    padding: "40px",
-    borderRadius: "20px",
-    textAlign: "center",
-    color: "white",
-    width: "90%",
-    maxWidth: "600px",
-    boxShadow: "0 0 30px cyan",
-    backdropFilter: "blur(10px)"
-  },
-  button: {
-    margin: "10px",
-    padding: "10px 20px",
-    background: "cyan",
-    border: "none",
-    borderRadius: "10px",
-    cursor: "pointer",
-    fontWeight: "bold"
-  },
-  hintButton: {
-    marginTop: "10px",
-    padding: "8px 15px",
-    background: "orange",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer"
-  },
-  hintText: {
-    marginTop: "10px",
-    color: "yellow"
-  },
-  info: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "20px"
-  }
-};
 
 export default Level1;

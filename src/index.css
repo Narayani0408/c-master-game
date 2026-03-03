@@ -1,76 +1,75 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.game-container {
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.game-card {
+  background: rgba(0, 0, 0, 0.85);
+  width: 900px;
+  padding: 40px;
+  border-radius: 20px;
+  color: white;
+  box-shadow: 0 0 40px cyan;
+  text-align: center;
 }
 
-button {
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.question {
+  background: #111;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.options button {
+  padding: 12px;
+  background: cyan;
+  border: none;
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  font-weight: bold;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: 0.3s;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.options button:hover {
+  transform: scale(1.05);
+  background: #00ffffaa;
 }
-@keyframes move {
-  from {
-    transform: translate(0, 0);
-  }
-  to {
-    transform: translate(-200px, -200px);
-  }
+
+.hint-btn {
+  margin-top: 20px;
+  padding: 8px 15px;
+  background: orange;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.hint-text {
+  margin-top: 10px;
+  color: yellow;
 }
