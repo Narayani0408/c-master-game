@@ -1,192 +1,223 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
+import clickSound from "../assets/sounds/click.mp3";
 import correctSound from "../assets/sounds/correct.mp3";
 import wrongSound from "../assets/sounds/wrong.mp3";
-import clickSound from "../assets/sounds/click.mp3";
+import timerSound from "../assets/sounds/timer.mp3";
+import winSound from "../assets/sounds/win.mp3";
+import gameoverSound from "../assets/sounds/gameover.mp3";
 
-function Level1({ goHome }) {
+function Level1() {
 
+const clickAudio = new Audio(clickSound);
 const correctAudio = new Audio(correctSound);
 const wrongAudio = new Audio(wrongSound);
-const clickAudio = new Audio(clickSound);
+const timerAudio = new Audio(timerSound);
+const winAudio = new Audio(winSound);
+const gameoverAudio = new Audio(gameoverSound);
 
 const questions = [
 
 {
-question:"Output of this code?",
-code:`#include<stdio.h>
-int main(){
-int a=5,b=10;
-printf("%d",a+b);
-}`,
-options:["510","15","5","10"],
+question: "What is the output?\n\nint a=5;\nprintf(\"%d\",a++);",
+options:["5","6","Error","Garbage"],
+answer:"5",
+hint:"Post increment prints first then increases"
+},
+
+{
+question: "What is the output?\n\nint x=10;\nprintf(\"%d\",++x);",
+options:["10","11","12","Error"],
+answer:"11",
+hint:"Pre increment increases first"
+},
+
+{
+question: "Which loop executes at least once?",
+options:["for","while","do while","none"],
+answer:"do while",
+hint:"Condition checked after execution"
+},
+
+{
+question:"Output?\n\nint a=3,b=4;\nprintf(\"%d\",a+b*a);",
+options:["15","19","7","16"],
 answer:"15",
-hint:"Simple addition"
+hint:"Multiplication first"
 },
 
 {
-question:"Which datatype stores one character?",
-options:["int","char","float","string"],
-answer:"char",
-hint:"Used for letters"
+question:"Output?\n\nint a=10;\nprintf(\"%d\",a/3);",
+options:["3","3.33","Error","4"],
+answer:"3",
+hint:"Integer division"
 },
 
 {
-question:"Output?",
-code:`#include<stdio.h>
-int main(){
-int x=10;
-printf("%d %d",x++,++x);
-}`,
-options:["10 12","10 11","11 11","11 12"],
-answer:"10 12",
-hint:"Post increment first"
+question:"Which symbol is used for pointer?",
+options:["&","*","#","@"],
+answer:"*",
+hint:"Used in pointer declaration"
 },
 
 {
-question:"Output?",
-code:`#include<stdio.h>
-int main(){
-int i;
-for(i=0;i<3;i++)
-printf("%d",i);
-}`,
-options:["012","123","321","Error"],
-answer:"012",
-hint:"Loop starts at zero"
+question:"Output?\n\nprintf(\"%d\",sizeof(int));",
+options:["2","4","8","Depends on compiler"],
+answer:"Depends on compiler",
+hint:"System dependent"
 },
 
 {
-question:"Output?",
-code:`#include<stdio.h>
-int main(){
-int a=3;
-printf("%d",a<<1);
-}`,
-options:["6","3","1","8"],
-answer:"6",
-hint:"Left shift multiply by 2"
+question:"Which function reads formatted input?",
+options:["printf","scanf","gets","puts"],
+answer:"scanf",
+hint:"Input function"
 },
 
 {
-question:"Which is input function?",
-options:["scanf()","printf()","cin","get()"],
-answer:"scanf()",
-hint:"Used for user input"
+question:"Output?\n\nint a=2;\nprintf(\"%d\",a<<1);",
+options:["2","3","4","1"],
+answer:"4",
+hint:"Left shift multiplies by 2"
+},
+
+{
+question:"Which header file is required for printf?",
+options:["stdio.h","conio.h","math.h","stdlib.h"],
+answer:"stdio.h",
+hint:"Standard input output"
 }
 
 ];
 
-const [current,setCurrent]=useState(0);
+const [currentQuestion,setCurrentQuestion]=useState(0);
 const [score,setScore]=useState(0);
-const [selected,setSelected]=useState(null);
-const [showResult,setShowResult]=useState(false);
-const [time,setTime]=useState(30);
+const [timeLeft,setTimeLeft]=useState(30);
 const [hintsLeft,setHintsLeft]=useState(3);
 const [showHint,setShowHint]=useState(false);
+const [gameOver,setGameOver]=useState(false);
 
 useEffect(()=>{
-if(time>0){
-const timer=setTimeout(()=>setTime(time-1),1000);
-return ()=>clearTimeout(timer);
-}else{
-nextQuestion();
-}
-},[time]);
 
-const checkAnswer=(option)=>{
+if(gameOver) return;
 
-setSelected(option);
+const timer=setInterval(()=>{
 
-if(option===questions[current].answer){
-setScore(score+1);
-correctAudio.play();
-}else{
-wrongAudio.play();
+setTimeLeft(prev=>{
+
+if(prev===6){
+timerAudio.play();
 }
 
-};
+if(prev===1){
+handleNext();
+return 30;
+}
 
-const nextQuestion=()=>{
+return prev-1;
+
+});
+
+},1000);
+
+return()=>clearInterval(timer);
+
+});
+
+const handleAnswer=(option)=>{
 
 clickAudio.play();
 
-setShowHint(false);
-setSelected(null);
-setTime(30);
+if(option===questions[currentQuestion].answer){
 
-if(current+1<questions.length){
-setCurrent(current+1);
+correctAudio.play();
+setScore(score+1);
+
 }else{
-setShowResult(true);
+
+wrongAudio.play();
+
+}
+
+handleNext();
+
+};
+
+const handleNext=()=>{
+
+if(currentQuestion+1<questions.length){
+
+setCurrentQuestion(currentQuestion+1);
+setTimeLeft(30);
+setShowHint(false);
+
+}else{
+
+setGameOver(true);
+
+if(score>=7){
+winAudio.play();
+}else{
+gameoverAudio.play();
+}
+
 }
 
 };
 
 const useHint=()=>{
+
 if(hintsLeft>0){
+
 setHintsLeft(hintsLeft-1);
 setShowHint(true);
-}
-};
 
-if(showResult){
+}
+
+};
 
 return(
 
 <div style={styles.container}>
 
-<h1 style={styles.title}>🎉 Level 1 Completed</h1>
+<div style={styles.background}></div>
 
-<h2 style={styles.score}>
-Score: {score} / {questions.length}
-</h2>
+<div style={styles.gameBox}>
 
-<button style={styles.mainBtn} onClick={goHome}>
-Back to Home
-</button>
+{gameOver ? (
+
+<div>
+
+<h1>Level Completed</h1>
+<h2>Score: {score}/10</h2>
+
+{score>=7 ?
+<h2 style={{color:"lightgreen"}}>LEVEL PASSED</h2> :
+<h2 style={{color:"red"}}>GAME OVER</h2>
+}
 
 </div>
 
-)
+):( 
 
-}
+<div>
 
-return(
+<h2>LEVEL 1</h2>
 
-<div style={styles.container}>
+<h3>Question {currentQuestion+1}/10</h3>
 
-<div style={styles.card}>
-
-<h1 style={styles.title}>Level 1</h1>
-
-<h2 style={styles.timer}>⏳ {time}s</h2>
-
-<h2 style={styles.question}>
-Question {current+1} / {questions.length}
-</h2>
-
-<p style={styles.questionText}>
-{questions[current].question}
+<p style={styles.question}>
+{questions[currentQuestion].question}
 </p>
-
-{questions[current].code && (
-<pre style={styles.code}>
-{questions[current].code}
-</pre>
-)}
 
 <div style={styles.options}>
 
-{questions[current].options.map((option,index)=>(
+{questions[currentQuestion].options.map((option,index)=>(
 
 <button
 key={index}
-style={{
-...styles.optionBtn,
-background:selected===option ? "#00c6ff" : "#1f2937"
-}}
-onClick={()=>checkAnswer(option)}
+style={styles.button}
+onClick={()=>handleAnswer(option)}
 >
 
 {option}
@@ -197,27 +228,29 @@ onClick={()=>checkAnswer(option)}
 
 </div>
 
-<div style={styles.hintSection}>
+<div style={styles.info}>
 
-<button style={styles.hintBtn} onClick={useHint}>
-💡 Use Hint ({hintsLeft} left)
-</button>
+<p>Time Left: {timeLeft}s</p>
 
-{showHint && (
-<p style={styles.hint}>
-Hint: {questions[current].hint}
-</p>
-)}
+<p>Score: {score}</p>
+
+<p>Hints Left: {hintsLeft}</p>
 
 </div>
 
-<button style={styles.mainBtn} onClick={nextQuestion}>
-Next Question
+<button style={styles.hintBtn} onClick={useHint}>
+Use Hint
 </button>
 
-<button style={styles.backBtn} onClick={goHome}>
-Back
-</button>
+{showHint &&
+<p style={styles.hint}>
+Hint: {questions[currentQuestion].hint}
+</p>
+}
+
+</div>
+
+)}
 
 </div>
 
@@ -231,109 +264,78 @@ const styles={
 
 container:{
 height:"100vh",
-width:"100vw",
+width:"100%",
 display:"flex",
 justifyContent:"center",
 alignItems:"center",
-background:"linear-gradient(-45deg,#0f2027,#203a43,#2c5364,#1c1c1c)",
-backgroundSize:"400% 400%",
-animation:"gradient 15s ease infinite",
 color:"white",
-fontFamily:"sans-serif"
+fontFamily:"monospace",
+overflow:"hidden",
+position:"relative"
 },
 
-card:{
-width:"900px",
-padding:"40px",
-borderRadius:"15px",
+background:{
+position:"absolute",
+height:"100%",
+width:"100%",
+background:"black",
+backgroundImage:"linear-gradient(45deg,#0f2027,#203a43,#2c5364)",
+animation:"moveBg 10s infinite linear",
+zIndex:-1
+},
+
+gameBox:{
+width:"70%",
+maxWidth:"900px",
 background:"rgba(0,0,0,0.7)",
-boxShadow:"0px 0px 20px rgba(0,0,0,0.5)",
-textAlign:"center"
-},
-
-title:{
-fontSize:"40px",
-marginBottom:"10px"
-},
-
-timer:{
-fontSize:"28px",
-color:"#00c6ff"
+padding:"40px",
+borderRadius:"10px",
+textAlign:"center",
+boxShadow:"0 0 20px cyan"
 },
 
 question:{
-fontSize:"26px"
-},
-
-questionText:{
-fontSize:"24px",
+fontSize:"22px",
+whiteSpace:"pre-line",
 marginBottom:"20px"
-},
-
-code:{
-background:"#111",
-padding:"20px",
-borderRadius:"10px",
-fontSize:"20px",
-textAlign:"left"
 },
 
 options:{
 display:"grid",
 gridTemplateColumns:"1fr 1fr",
-gap:"20px",
-marginTop:"20px"
+gap:"15px"
 },
 
-optionBtn:{
-padding:"18px",
-fontSize:"22px",
-borderRadius:"10px",
-border:"none",
+button:{
+padding:"12px",
+fontSize:"18px",
 cursor:"pointer",
-color:"white"
+borderRadius:"5px",
+border:"none",
+background:"cyan",
+color:"black",
+fontWeight:"bold"
 },
 
-hintSection:{
-marginTop:"20px"
+info:{
+marginTop:"20px",
+fontSize:"18px",
+display:"flex",
+justifyContent:"space-around"
 },
 
 hintBtn:{
-padding:"12px 20px",
-fontSize:"18px",
-borderRadius:"8px",
+marginTop:"20px",
+padding:"10px 20px",
+fontSize:"16px",
+background:"orange",
 border:"none",
 cursor:"pointer"
 },
 
 hint:{
 marginTop:"10px",
-fontSize:"20px",
-color:"#00eaff"
-},
-
-mainBtn:{
-marginTop:"25px",
-padding:"15px 30px",
-fontSize:"20px",
-borderRadius:"10px",
-border:"none",
-cursor:"pointer",
-background:"#00c6ff",
-color:"white"
-},
-
-backBtn:{
-marginTop:"10px",
-padding:"10px 20px",
-fontSize:"18px",
-borderRadius:"8px",
-border:"none",
-cursor:"pointer"
-},
-
-score:{
-fontSize:"30px"
+color:"yellow"
 }
 
 };
