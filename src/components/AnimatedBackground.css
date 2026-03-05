@@ -1,0 +1,105 @@
+.background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* Gradient animation */
+
+.gradient-bg {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    -45deg,
+    #0f2027,
+    #203a43,
+    #2c5364,
+    #1f1c2c
+  );
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Floating particles */
+
+.particles span {
+  position: absolute;
+  display: block;
+  width: 15px;
+  height: 15px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  animation: float 20s linear infinite;
+}
+
+.particles span:nth-child(1) {
+  left: 10%;
+  animation-duration: 18s;
+}
+
+.particles span:nth-child(2) {
+  left: 20%;
+  animation-duration: 22s;
+}
+
+.particles span:nth-child(3) {
+  left: 35%;
+  animation-duration: 15s;
+}
+
+.particles span:nth-child(4) {
+  left: 50%;
+  animation-duration: 25s;
+}
+
+.particles span:nth-child(5) {
+  left: 65%;
+  animation-duration: 19s;
+}
+
+.particles span:nth-child(6) {
+  left: 75%;
+  animation-duration: 17s;
+}
+
+.particles span:nth-child(7) {
+  left: 85%;
+  animation-duration: 23s;
+}
+
+.particles span:nth-child(8) {
+  left: 95%;
+  animation-duration: 20s;
+}
+
+@keyframes float {
+  0% {
+    bottom: -50px;
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(100px);
+  }
+
+  100% {
+    bottom: 110%;
+    transform: translateX(-100px);
+  }
+}
